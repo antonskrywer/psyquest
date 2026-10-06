@@ -4,12 +4,17 @@
 \alias{MLP}
 \title{MLP}
 \usage{
-MLP(label = "MLP", dict = psyquest::psyquest_dict, ...)
+MLP(label = "MLP", dict = psyquest::psyquest_dict, shortscale = FALSE, ...)
 }
 \arguments{
 \item{label}{(Character scalar) Label für die Ergebnisse in der Ausgabedatei.}
 
 \item{dict}{(i18n_dict) psyquest-Dictionary für Internationalisierung.}
+
+\item{shortscale}{(Logical) Wenn TRUE, werden nur Items der Kurzskala
+angezeigt (feste Liste \code{mlp_shortscale_items} im Funktionskörper,
+von Hand aus der Spalte "shortscale" in MLP_Itembank_3Ebenen.xlsx
+abgeleitet). Standard: FALSE (alle Items).}
 
 \item{...}{Weitere Argumente.}
 }
@@ -20,4 +25,18 @@ Testsitzungen siehe \code{\link{MLP_standalone}()}.
 Hand gebaut (nicht \code{main_test()}), da MLP mehrstufige Items
 (individuums-/norm-/kriterienbezogen: L1/L2/L3), einen bedingten
 Instrumenten-Block und eine bedingte Sozio-Demografie-Sektion enthält.
+}
+\details{
+Ablauf pro Sitzung: Lehrkraft-Code, Erstbeurteilung ja/nein, "letzte
+Sitzung vor den Schulferien" ja/nein, VdM-Stufe der aktuellen Literatur,
+Hauptstückwechsel ja/nein, dann die Item-Blöcke. Pro Item wird L3 immer,
+L2 nur in der letzten Sitzung vor den Schulferien und L1 nur ab der
+zweiten Beurteilung eines Kindes angezeigt. Zwischenstände werden nach
+jedem Block gespeichert. Die Schüler-ID kommt über
+\code{MLP_standalone(with_id = TRUE)} (Feld \code{p_id}).
+
+Design: Antworten erscheinen als Karten (5-stufige Items nummeriert),
+eine angetippte Karte wird kurz markiert, dann folgt die nächste Seite.
+Oben zeigt ein Balken den ungefähren Fortschritt. CSS/JS liegen in
+\code{inst/www/mlp} und greifen nur auf MLP-Seiten.
 }

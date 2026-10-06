@@ -2,7 +2,7 @@
 #'
 #' This function launches a standalone testing session for a questionnaire with the specified label.
 #' Valid labels are 'BMR', 'BFT'. 'BFC', CBQ', CCM', 'DAC', 'DEG', 'GDS', 'GMS', 'GRT', 'HOP', 'HUM', 'HSP', 'IBQ', MES', 'MES', 'MHE', 'MHI', 'MHP', 'PAC', 'PMS', 'LON'
-#' 'SDQ', 'SEM', 'SES','SMP', 'SOS', 'SWL', TOI', 'TOM', and 'TPI'.
+#' 'SDQ', 'SEM', 'SES','SMP', 'SOS', 'SWL', TOI', 'TOM', 'TPI', and 'MLP'.
 #' This can be used for data collection, either in the laboratory or online.
 #'
 #' @param label (Character scalar) Three uppercase letter acronym of the questionnaire.
@@ -33,6 +33,11 @@
 #' @param validate_id (Character scalar or closure) Function for validating IDs or string "auto"
 #' for default validation which means ID should consist only of alphanumeric characters.
 #'
+#' @param logo (Character scalar) Path (under a Shiny resource path) of the header logo.
+#' @param logo_width (Character scalar) CSS width of the header logo.
+#' @param css (Character vector) Paths to CSS files to include inline in every page.
+#' @param additional_scripts (Character vector) Paths to JS files to include in every page.
+#'
 #' @param ... Further arguments to be passed to \code{\link{standalone}()}.
 #'
 #' @export
@@ -48,6 +53,10 @@ standalone <- function(label,
                        validate_id = "auto",
                        randomize = FALSE,
                        alt_intro = NULL,
+                       logo = "www_psyquest/images/longgold_logo_transparent.png",
+                       logo_width = "100px",
+                       css = character(),
+                       additional_scripts = character(),
                        ...) {
   subscales <- sort(subscales)
   items <-
@@ -104,9 +113,11 @@ standalone <- function(label,
       researcher_email = researcher_email,
       demo = FALSE,
       languages = languages,
-      logo = "www_psyquest/images/longgold_logo_transparent.png",
-      logo_width = "100px",
-      logo_height = "auto"
+      logo = logo,
+      logo_width = logo_width,
+      logo_height = "auto",
+      display = psychTestR::display_options(css = css),
+      additional_scripts = additional_scripts
     )
   )
 }
@@ -1307,3 +1318,32 @@ TPI_standalone <-
                languages = languages,
                subscales = subscales,
                ...)
+#' MLP Standalone
+#'
+#' Startet eine eigenständige Testsitzung für das Musical Learning Protocol.
+#' Für die Längsschnitt-Erhebung wird die ID-Abfrage (Schüler-Code, gespeichert
+#' als \code{p_id}) standardmäßig aktiviert und die Kurzskala verwendet.
+#' Die Vollversion mit allen Items gibt es über \code{shortscale = FALSE}.
+#'
+#' @param languages (Character vector) Verfügbare Sprachen, Standard ist die erste.
+#' Im Kopf erscheint das UHH-Logo, alle Seiten (auch ID- und Schlussseite)
+#' nutzen das MLP-Design aus \code{inst/www/mlp}.
+#'
+#' @param with_id (Boolean) Schüler-Code abfragen (\code{p_id}). Standard: TRUE.
+#' @param shortscale (Boolean) Nur Items der Kurzskala anzeigen. Standard: TRUE.
+#' @param ... Weitere Argumente an \code{\link{standalone}()}.
+#' @export
+MLP_standalone <- function(languages = psyquest::languages(),
+                           with_id = TRUE,
+                           shortscale = TRUE,
+                           ...) {
+  www_mlp <- system.file("www", "mlp", package = "psyquest")
+  standalone(label = "MLP", languages = languages, with_id = with_id,
+             shortscale = shortscale,
+             logo = "www_psyquest/mlp/uhh-logo.svg",
+             logo_width = "110px",
+             css = file.path(www_mlp, "mlp.css"),
+             additional_scripts = c(file.path(www_mlp, "mlp-standalone.js"),
+                                    file.path(www_mlp, "mlp.js")),
+             ...)
+}

@@ -10,15 +10,15 @@ library(dplyr)
 library(stringr)
 library(readr)
 
-xlsx_path <- "C:/Users/Anton/Nextcloud/Promotion/JMS/MLP/data_raw/MLP_Itembank_3Ebenen.xlsx"  # Pfad ggf. anpassen
-raw <- read_excel(xlsx_path, sheet = "MLP_Itembank_3Ebenen")
+xlsx_path <- "data_raw/MLP_Itembank_3Ebenen.xlsx"  # Pfad ggf. anpassen
+raw_all <- read_excel(xlsx_path, sheet = "MLP_Itembank_3Ebenen")
 
 # Items, die laut MLP_structure.txt tatsächlich in der finalen MLP vorkommen.
 # MLP_0008 fehlt in der Itembank (structure.txt nennt "0005 bis 0011") -> übersprungen.
 used_items <- c(
-  "MLP_0000", "MLP_0001",                                                    # expression
   "MLP_0003", "MLP_0004",                                                    # overall
   "MLP_0005", "MLP_0006", "MLP_0007", "MLP_0009", "MLP_0010", "MLP_0011",    # technique
+  "MLP_0000", "MLP_0001", "MLP_0002",                                        # expression
   "MLP_0012", "MLP_0013", "MLP_0014", "MLP_0015", "MLP_0016", "MLP_0017",    # woodwind
   "MLP_0018", "MLP_0019", "MLP_0020", "MLP_0021",                            # guitar
   "MLP_0022", "MLP_0023", "MLP_0024", "MLP_0025",                            # brass
@@ -52,7 +52,7 @@ item_order <- tibble(item = used_items, item_rank = seq_along(used_items))
 # eigenes Postprocessing, falls L1/L2/L3 getrennt ausgewertet werden sollen.
 item_bank <- raw %>%
   filter(kind == "PROMPT") %>%
-  distinct(item, level, subscale) %>%
+  distinct(item, level, subscale, shortscale) %>%
   left_join(item_order, by = "item") %>%
   arrange(item_rank, match(level, c("L1", "L2", "L3"))) %>%
   mutate(main_id = paste0("TMLP_", str_remove(item, "MLP_"), "_", level)) %>%
@@ -63,7 +63,8 @@ item_bank <- raw %>%
     score_func = "function(x) x+0",   # Annahme: CHOICE1 (schlechtester) -> CHOICE5 (bester) durchgehend aufsteigend
     subscales  = subscale,
     layout     = "vertical",
-    level
+    level,
+    shortscale = shortscale == "T"    # NEU: konvertiert "T"/"F" -> logisches TRUE/FALSE
   )
 dir.create("data_raw/item_banks", recursive = TRUE, showWarnings = FALSE)
 dir.create("data_raw/dicts", recursive = TRUE, showWarnings = FALSE)
@@ -86,9 +87,9 @@ intro_dict <- raw_all %>%
 # Custom-Texte für die nicht-Item-Seiten (Titel, Intro, Meta-/Sozio-Fragen)
 custom_dict <- tibble::tribble(
   ~key,                             ~de,                                                                       ~en,
-  "TMLP_0000_PROMPT",               "Musical Learning Protocol",                                               "Musical Learning Protocol",
+  "TMLP_0000_PROMPT",               "DELTA-M · Musical Learning Protocol",                                               "DELTA-M · Musical Learning Protocol",
   "TMLP_0001_PROMPT",               "Willkommen zum Musical Learning Protocol (MLP).",                         "Welcome to the Musical Learning Protocol (MLP).",
-  "TMLP_FIRSTTIME_PROMPT",          "Ist dies das erste Mal, dass Sie das MLP ausfüllen?",                     "Is this the first time you fill out the MLP?",
+  "TMLP_FIRSTTIME_PROMPT",          "Beurteilen Sie diese/n Schüler/in zum ersten Mal mit dem MLP?",           "Are you assessing this pupil with the MLP for the first time?",
   "TMLP_FIRSTTIME_CHOICE1",         "Ja",                                                                       "Yes",
   "TMLP_FIRSTTIME_CHOICE2",         "Nein",                                                                     "No",
   "TMLP_INSTRUMENT_GROUP_PROMPT",   "Welche Instrumentengruppe lernt der/die Schüler/in?",                     "Which instrumental group does the pupil learn?",
@@ -100,8 +101,26 @@ custom_dict <- tibble::tribble(
   "TMLP_PRACTICE_PUPIL_PROMPT",     "Frage die Schülerin/den Schüler: Wie viele Minuten wurde in der letzten Woche durchschnittlich pro Tag geübt?", "Ask the pupil: On average, how many minutes per day did he or she practice in the last week?",
   "TMLP_PRACTICE_TEACHER_PROMPT",   "Wie viele Minuten pro Tag, schätzen Sie, hat der/die Schüler/in geübt?", "For how many minutes per day do you think the pupil practiced?",
   "TMLP_AGE_PROMPT",                "Wie alt ist der/die Schüler/in?",                                         "How old is the pupil?",
-  "TMLP_INSTRUMENT_PROMPT",         "Welches Instrument lernt der/die Schüler/in?",                            "What instrument is the pupil learning?"
+  "TMLP_INSTRUMENT_PROMPT",         "Welches Instrument lernt der/die Schüler/in?",                            "What instrument is the pupil learning?",
+  "TMLP_TEACHER_CODE_PROMPT",   "Bitte geben Sie Ihren Lehrkraft-Code ein.",   "Please enter your teacher code.",
+  "TMLP_PRE_HOLIDAY_PROMPT",   "Ist dies die letzte Sitzung vor den Schulferien?",   "Is this the last session before the school holidays?",
+  "TMLP_PRE_HOLIDAY_CHOICE1",   "Ja",   "Yes",
+  "TMLP_PRE_HOLIDAY_CHOICE2",   "Nein",   "No",
+  "TMLP_VDM_LEVEL_PROMPT",   "Auf welcher Stufe liegt die Literatur, die der/die Schüler/in derzeit spielt? Bitte an den Ausbildungsstufen der VdM-Lehrpläne orientieren.",   "Which level is the repertoire the pupil is currently playing? Please refer to the VdM curriculum levels.",
+  "TMLP_VDM_LEVEL_CHOICE1",   "Unterstufe I – sehr leicht bis leicht",   "Level 1 (lower grade I) – very easy to easy",
+  "TMLP_VDM_LEVEL_CHOICE2",   "Unterstufe II – leicht bis mittelschwierig",   "Level 2 (lower grade II) – easy to moderately difficult",
+  "TMLP_VDM_LEVEL_CHOICE3",   "Mittelstufe I – mittelschwierig",   "Level 3 (intermediate grade I) – moderately difficult",
+  "TMLP_VDM_LEVEL_CHOICE4",   "Mittelstufe II – schwierig",   "Level 4 (intermediate grade II) – difficult",
+  "TMLP_VDM_LEVEL_CHOICE5",   "Oberstufe – sehr schwierig",   "Level 5 (upper grade) – very difficult",
+  "TMLP_NEW_PIECE_PROMPT",   "Hat der/die Schüler/in seit der letzten Beurteilung ein neues Hauptstück begonnen?",   "Has the pupil started a new main piece since the last assessment?",
+  "TMLP_NEW_PIECE_CHOICE1",   "Ja",   "Yes",
+  "TMLP_NEW_PIECE_CHOICE2",   "Nein",   "No"
 )
 
-dict <- bind_rows(item_dict, custom_dict) %>% filter(!is.na(de), !is.na(en))
+dict <- bind_rows(item_dict, custom_dict, intro_dict) %>% filter(!is.na(de), !is.na(en))
+
+# Schlüsselwörter der Antwortstufen als **fett** markieren (siehe MLP_bold_phrases.R);
+# setzt auch die sprachlich geänderten Texte (z. B. 0025, Stufe 5) ein.
+source("data_raw/MLP_bold_phrases.R", encoding = "UTF-8")
+dict <- mlp_apply_bold(dict)
 write_delim(dict, "data_raw/dicts/MLP_dict.csv", delim = ";", quote = "all")

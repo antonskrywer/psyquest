@@ -4,13 +4,27 @@
 \alias{MLP_standalone}
 \title{MLP Standalone}
 \usage{
-MLP_standalone(languages = psyquest::languages(), ...)
+MLP_standalone(
+  languages = psyquest::languages(),
+  with_id = TRUE,
+  shortscale = TRUE,
+  ...
+)
 }
 \arguments{
-\item{languages}{(Character vector) Verfügbare Sprachen, Standard ist die erste.}
+\item{languages}{(Character vector) Verfügbare Sprachen, Standard ist die erste.
+Im Kopf erscheint das UHH-Logo, alle Seiten (auch ID- und Schlussseite)
+nutzen das MLP-Design aus \code{inst/www/mlp}.}
+
+\item{with_id}{(Boolean) Schüler-Code abfragen (\code{p_id}). Standard: TRUE.}
+
+\item{shortscale}{(Boolean) Nur Items der Kurzskala anzeigen. Standard: TRUE.}
 
 \item{...}{Weitere Argumente an \code{\link{standalone}()}.}
 }
 \description{
 Startet eine eigenständige Testsitzung für das Musical Learning Protocol.
+Für die Längsschnitt-Erhebung wird die ID-Abfrage (Schüler-Code, gespeichert
+als \code{p_id}) standardmäßig aktiviert und die Kurzskala verwendet.
+Die Vollversion mit allen Items gibt es über \code{shortscale = FALSE}.
 }

@@ -17,6 +17,10 @@ standalone(
   validate_id = "auto",
   randomize = FALSE,
   alt_intro = NULL,
+  logo = "www_psyquest/images/longgold_logo_transparent.png",
+  logo_width = "100px",
+  css = character(),
+  additional_scripts = character(),
   ...
 )
 }
@@ -50,11 +54,19 @@ bottom of the screen so that online participants can ask for help.}
 \item{validate_id}{(Character scalar or closure) Function for validating IDs or string "auto"
 for default validation which means ID should consist only of alphanumeric characters.}
 
+\item{logo}{(Character scalar) Path (under a Shiny resource path) of the header logo.}
+
+\item{logo_width}{(Character scalar) CSS width of the header logo.}
+
+\item{css}{(Character vector) Paths to CSS files to include inline in every page.}
+
+\item{additional_scripts}{(Character vector) Paths to JS files to include in every page.}
+
 \item{...}{Further arguments to be passed to \code{\link{standalone}()}.}
 }
 \description{
 This function launches a standalone testing session for a questionnaire with the specified label.
 Valid labels are 'BMR', 'BFT'. 'BFC', CBQ', CCM', 'DAC', 'DEG', 'GDS', 'GMS', 'GRT', 'HOP', 'HUM', 'HSP', 'IBQ', MES', 'MES', 'MHE', 'MHI', 'MHP', 'PAC', 'PMS', 'LON'
-'SDQ', 'SEM', 'SES','SMP', 'SOS', 'SWL', TOI', 'TOM', and 'TPI'.
+'SDQ', 'SEM', 'SES','SMP', 'SOS', 'SWL', TOI', 'TOM', 'TPI', and 'MLP'.
 This can be used for data collection, either in the laboratory or online.
 }

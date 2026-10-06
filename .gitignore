@@ -10,3 +10,5 @@ output/results/*
 output/deleted-results/*
 data/.DS_store
 .positai
+.Rproj.user
+.Rproj.user
